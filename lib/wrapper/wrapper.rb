@@ -1,4 +1,9 @@
+require 'active_support/core_ext/module/attribute_accessors'
+
 module WresqueWrapper
+  mattr_accessor :default_queue
+  self.default_queue = :high
+
   def self.extended(base)
     base.extend(ClassMethods)
     base.send(:include, InstanceMethods)
@@ -41,6 +46,7 @@ module WresqueWrapper
 
       def initialize(target,klass,target_id,queue)
         queue ||= klass.default_queue
+        queue ||= WresqueWrapper.default_queue
         unless queue
           raise RuntimeError, "No queue specified, and target class has no default queue", caller
         end
