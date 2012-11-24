@@ -64,8 +64,8 @@ module WresqueWrapper
         end
       end
 
-      def respond_to?(method)
-        super || @target.respond_to?(method)
+      def respond_to?(*args)
+        super || @target.respond_to?(*args)
       end
     end
   end
