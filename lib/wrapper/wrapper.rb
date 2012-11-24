@@ -1,25 +1,18 @@
 require 'active_support/core_ext/module/attribute_accessors'
+require 'active_support/core_ext/class/attribute'
+require 'active_support/concern'
 
 module WresqueWrapper
+  extend ActiveSupport::Concern
+
   mattr_accessor :default_queue
   self.default_queue = :high
 
-  def self.extended(base)
-    base.extend(ClassMethods)
-    base.send(:include, InstanceMethods)
+  included do
+    class_attribute :queue, :default_queue
   end
 
   module ClassMethods
-    def queue; @queue; end
-    def queue=(queue); @queue = queue; end
-
-    def default_queue; @default_queue; end
-    def default_queue=(queue); @default_queue = queue; end
-
-    def default_worker_queue(queue)
-      @default_queue = queue
-    end
-
     def perform(id, method, *args)
       ActiveRecord::Base.verify_active_connections!
       if id
@@ -29,38 +22,31 @@ module WresqueWrapper
       end
     end
 
-    def delay(opts={})
-      WresqueWrapper::WrapperProxies::Proxy.new(self,self,nil,opts[:queue])
+    def delay(options = {})
+      WresqueWrapper::WrapperProxies::Proxy.new(self, self, nil, options[:queue])
     end
   end
 
-  module InstanceMethods
-    def delay(opts={})
-      WresqueWrapper::WrapperProxies::Proxy.new(self,self.class,self.id,opts[:queue])
-    end
+  def delay(options = {})
+    WresqueWrapper::WrapperProxies::Proxy.new(self, self.class, self.id, options[:queue])
   end
 
   module WrapperProxies
     class Proxy
       attr_reader :target
 
-      def initialize(target,klass,target_id,queue)
-        queue ||= klass.default_queue
-        queue ||= WresqueWrapper.default_queue
-        unless queue
-          raise RuntimeError, "No queue specified, and target class has no default queue", caller
-        end
-        @target = target
-        @klass = klass
-        @target_id = target_id
-        @klass.queue = queue
+      def initialize(target, klass, target_id, queue)
+        @target      = target
+        @klass       = klass
+        @target_id   = target_id
+        @klass.queue = queue || @klass.default_queue || WresqueWrapper.default_queue
       end
 
-      def method_missing(method,*args)
+      def method_missing(method, *args)
         if @target.respond_to?(method)
-          Resque.enqueue(@klass,@target_id,method,*args)
+          Resque.enqueue(@klass, @target_id, method, *args)
         else
-          @target.send(method,*args)
+          @target.send(method, *args)
         end
       end
 

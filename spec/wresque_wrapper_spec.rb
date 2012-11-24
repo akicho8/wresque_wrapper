@@ -11,8 +11,8 @@ describe WresqueWrapper do
 
   before(:each) do
     class DummyClass
-      extend WresqueWrapper
-      default_worker_queue :dummy_queue
+      include WresqueWrapper
+      self.default_queue = :dummy_queue
       def id; 1; end
     end
 
@@ -21,8 +21,15 @@ describe WresqueWrapper do
     @dummy = DummyClass.new
   end
 
+  describe "Global default_queue" do
+    it do
+      WresqueWrapper.should respond_to :default_queue
+      WresqueWrapper.should respond_to :default_queue=
+    end
+  end
+
   describe "Class methods" do
-    describe ".extended" do
+    describe ".included" do
       it "should add accessors" do
         DummyClass.should respond_to :queue
         DummyClass.should respond_to :default_queue
@@ -33,38 +40,38 @@ describe WresqueWrapper do
       end
     end
 
-    describe ".default_worker_queue" do
+    describe ".default_queue" do
       it "should set the default queue" do
-        DummyClass.default_worker_queue(:dummier_queue)
-        DummyClass.default_queue.should eql :dummier_queue
+        DummyClass.default_queue = :dummier_queue
+        DummyClass.default_queue.should == :dummier_queue
       end
     end
 
     describe ".perform" do
       it "should send the method to an instance if given an id" do
         test_method = :test_method
-        test_args = [1,2,3]
+        test_args = [1, 2, 3]
         DummyClass.expects(:find).once.returns(@dummy)
-        @dummy.expects(:send).with(test_method,*test_args).once.returns(true)
-        DummyClass.perform(1,test_method,*test_args)
+        @dummy.expects(:send).with(test_method, *test_args).once.returns(true)
+        DummyClass.perform(1, test_method, *test_args)
       end
 
       it "should send the method to the class if no id is given" do
         test_method = :test_method
-        test_args = [1,2,3]
-        DummyClass.expects(:send).with(test_method,*test_args).once.returns(true)
-        DummyClass.perform(nil,test_method,*test_args)
+        test_args = [1, 2, 3]
+        DummyClass.expects(:send).with(test_method, *test_args).once.returns(true)
+        DummyClass.perform(nil, test_method, *test_args)
       end
     end
 
     describe ".delay" do
       it "should return the appropriate proxy object" do
-        DummyClass.delay.class.should eql WresqueWrapper::WrapperProxies::Proxy
+        DummyClass.delay.class.should == WresqueWrapper::WrapperProxies::Proxy
       end
 
-      it "should raise an exception if no queue is set" do
+      it "should not raise an exception if no queue is set" do
         DummyClass.default_queue = nil
-        lambda { DummyClass.delay }.should raise_error
+        lambda { DummyClass.delay }.should_not raise_error
       end
     end
   end
@@ -72,12 +79,12 @@ describe WresqueWrapper do
   describe "Instance methods" do
     describe "#delay" do
       it "should return the appropriate proxy object" do
-        @dummy.delay.class.should eql WresqueWrapper::WrapperProxies::Proxy
+        @dummy.delay.class.should == WresqueWrapper::WrapperProxies::Proxy
       end
 
-      it "should raise an exception if no queue is set" do
+      it "should not raise an exception if no queue is set" do
         DummyClass.default_queue = nil
-        lambda { @dummy.delay }.should raise_error
+        lambda { @dummy.delay }.should_not raise_error
       end
     end
   end
@@ -85,19 +92,16 @@ describe WresqueWrapper do
   describe WresqueWrapper::WrapperProxies do
     describe "Proxy for Class" do
       before(:each) do
-        @class_proxy = WresqueWrapper::WrapperProxies::Proxy.new(DummyClass,
-                                                                 DummyClass,
-                                                                 nil,
-                                                                 :new_queue)
+        @class_proxy = WresqueWrapper::WrapperProxies::Proxy.new(DummyClass, DummyClass, nil, :new_queue)
       end
 
       describe "#initialize" do
         it "should set the target class's queue" do
-          DummyClass.queue.should eql :new_queue
+          DummyClass.queue.should == :new_queue
         end
 
         it "should retain the target class" do
-          @class_proxy.target.should eql DummyClass
+          @class_proxy.target.should == DummyClass
         end
       end
 
@@ -110,19 +114,16 @@ describe WresqueWrapper do
 
     describe "Proxy for instance" do
       before(:each) do
-        @instance_proxy = WresqueWrapper::WrapperProxies::Proxy.new(@dummy,
-                                                                    @dummy.class,
-                                                                    @dummy.id,
-                                                                    :new_queue)
+        @instance_proxy = WresqueWrapper::WrapperProxies::Proxy.new(@dummy, @dummy.class, @dummy.id, :new_queue)
       end
 
       describe "#initialize" do
         it "should set the target class's queue" do
-          DummyClass.queue.should eql :new_queue
+          DummyClass.queue.should == :new_queue
         end
 
         it "should retain the target instance" do
-          @instance_proxy.target.should eql @dummy
+          @instance_proxy.target.should == @dummy
         end
       end
 
@@ -133,5 +134,4 @@ describe WresqueWrapper do
       end
     end
   end
-
 end
