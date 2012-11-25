@@ -21,10 +21,15 @@ describe WresqueWrapper do
     @dummy = DummyClass.new
   end
 
-  describe "Global default_queue" do
-    it do
+  describe "Global options" do
+    it "default_queue" do
       WresqueWrapper.should respond_to :default_queue
       WresqueWrapper.should respond_to :default_queue=
+    end
+
+    it "inline" do
+      WresqueWrapper.should respond_to :inline
+      WresqueWrapper.should respond_to :inline=
     end
   end
 
@@ -73,6 +78,11 @@ describe WresqueWrapper do
         DummyClass.default_queue = nil
         lambda { DummyClass.delay }.should_not raise_error
       end
+
+      it "with inline option" do
+        DummyClass.delay.should_not == DummyClass
+        DummyClass.delay(:inline => true).should == DummyClass
+      end
     end
   end
 
@@ -85,6 +95,11 @@ describe WresqueWrapper do
       it "should not raise an exception if no queue is set" do
         DummyClass.default_queue = nil
         lambda { @dummy.delay }.should_not raise_error
+      end
+
+      it "with inline option" do
+        @dummy.delay.should_not == @dummy
+        @dummy.delay(:inline => true).should == @dummy
       end
     end
   end

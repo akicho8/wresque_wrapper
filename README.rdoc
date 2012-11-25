@@ -19,16 +19,22 @@ Any class derived from ActiveRecord::Base can use the delay method, optionally s
   class MyModel < ActiveRecord::Base
     self.default_queue = :big_jobs # change high to big_jobs
   end
-  
+
   # app/models/other_model.rb
   class OtherModel < ActiveRecord::Base
-     # default_queue: high
   end
+  
+  MyModel.default_queue # => :big_jobs
+  MyModel.default_queue # => :high
   
 == Queue priority
 
   delay(:queue => :xxx) > MyClass.default_queue > WresqueWrapper.default_queue
 
+== Inline option
+
+  object.delay(:inline => true).some_method     # Same as object.some_method
+  
 == Contributing to wresque_wrapper
  
 * Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet
@@ -43,4 +49,3 @@ Any class derived from ActiveRecord::Base can use the delay method, optionally s
 
 Copyright (c) 2011 Tribesports Ltd. See LICENSE.txt for
 further details.
-

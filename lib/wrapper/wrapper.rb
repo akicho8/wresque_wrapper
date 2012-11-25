@@ -1,5 +1,6 @@
 require 'active_support/core_ext/module/attribute_accessors'
 require 'active_support/core_ext/class/attribute'
+require 'active_support/core_ext/hash/keys'
 require 'active_support/concern'
 
 module WresqueWrapper
@@ -7,6 +8,9 @@ module WresqueWrapper
 
   mattr_accessor :default_queue
   self.default_queue = :high
+
+  mattr_accessor :inline
+  self.inline = false
 
   included do
     class_attribute :queue, :default_queue
@@ -23,12 +27,26 @@ module WresqueWrapper
     end
 
     def delay(options = {})
-      WresqueWrapper::WrapperProxies::Proxy.new(self, self, nil, options[:queue])
+      options = {
+        :inline => WresqueWrapper.inline,
+      }.merge(options.to_options)
+      if options[:inline]
+        self
+      else
+        WresqueWrapper::WrapperProxies::Proxy.new(self, self, nil, options[:queue])
+      end
     end
   end
 
   def delay(options = {})
-    WresqueWrapper::WrapperProxies::Proxy.new(self, self.class, self.id, options[:queue])
+    options = {
+      :inline => WresqueWrapper.inline,
+    }.merge(options.to_options)
+    if options[:inline]
+      self
+    else
+      WresqueWrapper::WrapperProxies::Proxy.new(self, self.class, self.id, options[:queue])
+    end
   end
 
   module WrapperProxies
