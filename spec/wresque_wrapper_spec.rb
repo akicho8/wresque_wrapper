@@ -71,7 +71,7 @@ describe WresqueWrapper do
 
     describe ".delay" do
       it "should return the appropriate proxy object" do
-        DummyClass.delay.class.should == WresqueWrapper::WrapperProxies::Proxy
+        DummyClass.delay.class.should == WresqueWrapper::Proxy
       end
 
       it "should not raise an exception if no queue is set" do
@@ -89,7 +89,7 @@ describe WresqueWrapper do
   describe "Instance methods" do
     describe "#delay" do
       it "should return the appropriate proxy object" do
-        @dummy.delay.class.should == WresqueWrapper::WrapperProxies::Proxy
+        @dummy.delay.class.should == WresqueWrapper::Proxy
       end
 
       it "should not raise an exception if no queue is set" do
@@ -104,10 +104,10 @@ describe WresqueWrapper do
     end
   end
 
-  describe WresqueWrapper::WrapperProxies do
+  describe WresqueWrapper::Proxy do
     describe "Proxy for Class" do
       before(:each) do
-        @class_proxy = WresqueWrapper::WrapperProxies::Proxy.new(DummyClass, DummyClass, nil, :new_queue)
+        @class_proxy = WresqueWrapper::Proxy.new(DummyClass, DummyClass, nil, :new_queue)
       end
 
       describe "#initialize" do
@@ -129,7 +129,7 @@ describe WresqueWrapper do
 
     describe "Proxy for instance" do
       before(:each) do
-        @instance_proxy = WresqueWrapper::WrapperProxies::Proxy.new(@dummy, @dummy.class, @dummy.id, :new_queue)
+        @instance_proxy = WresqueWrapper::Proxy.new(@dummy, @dummy.class, @dummy.id, :new_queue)
       end
 
       describe "#initialize" do

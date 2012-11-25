@@ -33,7 +33,7 @@ module WresqueWrapper
       if options[:inline]
         self
       else
-        WresqueWrapper::WrapperProxies::Proxy.new(self, self, nil, options[:queue])
+        WresqueWrapper::Proxy.new(self, self, nil, options[:queue])
       end
     end
   end
@@ -45,32 +45,30 @@ module WresqueWrapper
     if options[:inline]
       self
     else
-      WresqueWrapper::WrapperProxies::Proxy.new(self, self.class, self.id, options[:queue])
+      WresqueWrapper::Proxy.new(self, self.class, self.id, options[:queue])
     end
   end
 
-  module WrapperProxies
-    class Proxy
-      attr_reader :target
+  class Proxy
+    attr_reader :target
 
-      def initialize(target, klass, target_id, queue)
-        @target      = target
-        @klass       = klass
-        @target_id   = target_id
-        @klass.queue = queue || @klass.default_queue || WresqueWrapper.default_queue
-      end
+    def initialize(target, klass, target_id, queue)
+      @target      = target
+      @klass       = klass
+      @target_id   = target_id
+      @klass.queue = queue || @klass.default_queue || WresqueWrapper.default_queue
+    end
 
-      def method_missing(method, *args)
-        if @target.respond_to?(method)
-          Resque.enqueue(@klass, @target_id, method, *args)
-        else
-          @target.send(method, *args)
-        end
+    def method_missing(method, *args)
+      if @target.respond_to?(method)
+        Resque.enqueue(@klass, @target_id, method, *args)
+      else
+        @target.send(method, *args)
       end
+    end
 
-      def respond_to?(*args)
-        super || @target.respond_to?(*args)
-      end
+    def respond_to?(*args)
+      super || @target.respond_to?(*args)
     end
   end
 end
