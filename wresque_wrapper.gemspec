@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = "wresque_wrapper"
-  s.version = "0.1.3.1"
+  s.version = "0.1.3.2"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Simon Coffey"]
@@ -23,9 +23,10 @@ Gem::Specification.new do |s|
     "README.rdoc",
     "Rakefile",
     "VERSION",
+    "examples/sample1.rb",
     "init.rb",
-    "lib/wrapper/wrapper.rb",
     "lib/wresque_wrapper.rb",
+    "lib/wresque_wrapper/wresque_wrapper.rb",
     "spec/spec_helper.rb",
     "spec/wresque_wrapper_spec.rb",
     "wresque_wrapper.gemspec"

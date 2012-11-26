@@ -1,3 +1,3 @@
 require_relative "wresque_wrapper/wresque_wrapper"
 
-ActiveRecord::Base.extend(WresqueWrapper)
+ActiveRecord::Base.send(:include, WresqueWrapper)
