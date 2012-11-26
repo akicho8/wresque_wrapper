@@ -1,5 +1,5 @@
 require 'spec_helper'
-require 'wrapper/wrapper'
+require 'wresque_wrapper/wresque_wrapper'
 
 describe WresqueWrapper do
 

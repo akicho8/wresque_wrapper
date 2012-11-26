@@ -1,3 +1,3 @@
-require File.dirname(__FILE__) + '/wrapper/wrapper'
+require_relative "wresque_wrapper/wresque_wrapper"
 
 ActiveRecord::Base.extend(WresqueWrapper)

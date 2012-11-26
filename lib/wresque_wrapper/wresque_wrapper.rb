@@ -30,6 +30,7 @@ module WresqueWrapper
       options = {
         :inline => WresqueWrapper.inline,
       }.merge(options.to_options)
+
       if options[:inline]
         self
       else
