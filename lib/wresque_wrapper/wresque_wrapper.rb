@@ -51,13 +51,14 @@ module WresqueWrapper
   end
 
   class Proxy
-    attr_reader :target
+    attr_reader :target, :queue
 
     def initialize(target, klass, target_id, queue)
       @target      = target
       @klass       = klass
       @target_id   = target_id
-      @klass.queue = queue || @klass.default_queue || WresqueWrapper.default_queue
+      @queue       = queue || @klass.default_queue || WresqueWrapper.default_queue
+      @klass.queue = @queue
     end
 
     def method_missing(method, *args)
