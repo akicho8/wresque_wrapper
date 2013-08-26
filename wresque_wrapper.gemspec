@@ -16,6 +16,7 @@ Gem::Specification.new do |s|
   s.summary          = "Async-style queueing of class methods using Resque"
 
   s.add_dependency "resque"
+  s.add_dependency "resque-scheduler"
   s.add_dependency "rails"
 
   s.add_development_dependency "rspec"
@@ -25,4 +26,3 @@ Gem::Specification.new do |s|
   s.add_development_dependency "simplecov"
   s.add_development_dependency "activesupport"
 end
-
