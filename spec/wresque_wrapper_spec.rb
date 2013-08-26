@@ -1,5 +1,7 @@
 require 'spec_helper'
 require 'wresque_wrapper/wresque_wrapper'
+require 'resque'
+require 'resque_scheduler'
 
 describe WresqueWrapper do
 
@@ -143,10 +145,26 @@ describe WresqueWrapper do
       end
 
       describe "#method_missing" do
+        it "should Resque.enqueue return" do
+          @instance_proxy.send(:method_missing, :id).should be_true
+        end
       end
 
       describe "#respond_to?" do
       end
     end
+
+    describe "Proxy for instance with scheduler" do
+      before do
+        @instance_proxy = WresqueWrapper::Proxy.new(@dummy, @dummy.class, @dummy.id, :new_queue, 60)
+      end
+
+      describe "#method_missing" do
+        it "should Resque.enqueue_in return" do
+          @instance_proxy.send(:method_missing, :id).should be_true
+        end
+      end
+    end
+
   end
 end
