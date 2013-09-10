@@ -10,7 +10,7 @@ module WresqueWrapper
   self.default_queue = :high
 
   mattr_accessor :inline
-  self.inline = false
+  self.inline = defined?(Rails) ? Rails.env.test? : false
 
   included do
     class_attribute :queue, :default_queue
