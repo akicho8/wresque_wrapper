@@ -28,13 +28,13 @@ User.default_queue              # => nil
 User.default_queue = :queue2
 User.default_queue              # => :queue2
 
-User.delay                      # => #<WresqueWrapper::Proxy:0x007ff041614a20 @target=User(id: integer), @klass=User(id: integer), @target_id=nil, @queue=:queue2>
+User.delay                      # => #<WresqueWrapper::Proxy:0x007fb6142c9cd8 @klass_or_instance=User(id: integer), @klass=User(id: integer), @record_id=nil, @options={}, @queue=:queue2>
 User.delay.queue                # => :queue2
 User.delay(:inline => true)     # => User(id: integer)
 User.delay(:inline => true).foo # => "ok"
 
 user = User.create!
-user.delay                      # => #<WresqueWrapper::Proxy:0x007ff0416a0278 @target=#<User id: 1>, @klass=User(id: integer), @target_id=1, @queue=:queue2>
+user.delay                      # => #<WresqueWrapper::Proxy:0x007fb61431a930 @klass_or_instance=#<User id: 1>, @klass=User(id: integer), @record_id=1, @options={}, @queue=:queue2>
 user.delay.queue                # => :queue2
 user.delay(:inline => true)     # => #<User id: 1>
 user.delay(:inline => true).foo # => "ok"

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 require 'active_support/core_ext/module/attribute_accessors'
 require 'active_support/core_ext/class/attribute'
 require 'active_support/core_ext/hash/keys'
@@ -17,6 +18,7 @@ module WresqueWrapper
   end
 
   module ClassMethods
+    # 自分自身が Worker になっている
     def perform(id, method, *args)
       ActiveRecord::Base.verify_active_connections!
       if id
@@ -31,10 +33,10 @@ module WresqueWrapper
         :inline => WresqueWrapper.inline,
       }.merge(options.to_options)
 
-      if options[:inline]
+      if options.delete(:inline)
         self
       else
-        WresqueWrapper::Proxy.new(self, self, nil, options[:queue], options[:in])
+        WresqueWrapper::Proxy.new(self, self, nil, options)
       end
     end
   end
@@ -43,39 +45,49 @@ module WresqueWrapper
     options = {
       :inline => WresqueWrapper.inline,
     }.merge(options.to_options)
-    if options[:inline]
+
+    if options.delete(:inline)
       self
     else
-      WresqueWrapper::Proxy.new(self, self.class, self.id, options[:queue], options[:in])
+      WresqueWrapper::Proxy.new(self, self.class, id, options)
     end
   end
 
   class Proxy
-    attr_reader :target, :queue
+    attr_reader :klass_or_instance, :klass, :record_id, :queue, :options
 
-    def initialize(target, klass, target_id, queue, number_of_seconds_from_now = nil)
-      @target      = target
-      @klass       = klass
-      @target_id   = target_id
-      @queue       = queue || @klass.default_queue || WresqueWrapper.default_queue
+    def initialize(klass_or_instance, klass, record_id, options = {})
+      options.assert_valid_keys(:inline, :queue, :from_now, :at)
+
+      @klass_or_instance = klass_or_instance
+      @klass             = klass
+      @record_id         = record_id
+      @options           = options
+
+      @queue = @options[:queue] || @klass.default_queue || WresqueWrapper.default_queue
+
+      # ここは要注意。クラス変数を共有しているため、同じクラスでさまざまなキューを指定してしまうと指定通りのキューに行かない可能性がある。
+      # この副作用問題になるなら、いちいちクラスを作って Worker を作らないといけないので、
+      # 気軽に delay できるこのライブラリのメリットがなくなってしまう。
       @klass.queue = @queue
-      @number_of_seconds_from_now = number_of_seconds_from_now
     end
 
     def method_missing(method, *args)
-      if @target.respond_to?(method)
-        if @number_of_seconds_from_now
-          Resque.enqueue_in(@number_of_seconds_from_now, @klass, @target_id, method, *args)
+      if @klass_or_instance.respond_to?(method)
+        if @options[:at]
+          Resque.enqueue_at(@options[:at], @klass, @record_id, method, *args)
+        elsif @options[:from_now]
+          Resque.enqueue_in(@options[:from_now], @klass, @record_id, method, *args)
         else
-          Resque.enqueue(@klass, @target_id, method, *args)
+          Resque.enqueue(@klass, @record_id, method, *args)
         end
       else
-        @target.send(method, *args)
+        @klass_or_instance.send(method, *args)
       end
     end
 
     def respond_to?(*args)
-      super || @target.respond_to?(*args)
+      super || @klass_or_instance.respond_to?(*args)
     end
   end
 end

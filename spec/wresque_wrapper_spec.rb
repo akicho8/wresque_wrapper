@@ -109,7 +109,7 @@ describe WresqueWrapper do
   describe WresqueWrapper::Proxy do
     describe "Proxy for Class" do
       before(:each) do
-        @class_proxy = WresqueWrapper::Proxy.new(DummyClass, DummyClass, nil, :new_queue)
+        @class_proxy = WresqueWrapper::Proxy.new(DummyClass, DummyClass, nil, :queue => :new_queue)
       end
 
       describe "#initialize" do
@@ -118,7 +118,7 @@ describe WresqueWrapper do
         end
 
         it "should retain the target class" do
-          @class_proxy.target.should == DummyClass
+          @class_proxy.klass_or_instance.should == DummyClass
         end
       end
 
@@ -131,7 +131,7 @@ describe WresqueWrapper do
 
     describe "Proxy for instance" do
       before(:each) do
-        @instance_proxy = WresqueWrapper::Proxy.new(@dummy, @dummy.class, @dummy.id, :new_queue)
+        @instance_proxy = WresqueWrapper::Proxy.new(@dummy, @dummy.class, @dummy.id, :queue => :new_queue)
       end
 
       describe "#initialize" do
@@ -140,7 +140,7 @@ describe WresqueWrapper do
         end
 
         it "should retain the target instance" do
-          @instance_proxy.target.should == @dummy
+          @instance_proxy.klass_or_instance.should == @dummy
         end
       end
 
@@ -156,7 +156,7 @@ describe WresqueWrapper do
 
     describe "Proxy for instance with scheduler" do
       before do
-        @instance_proxy = WresqueWrapper::Proxy.new(@dummy, @dummy.class, @dummy.id, :new_queue, 60)
+        @instance_proxy = WresqueWrapper::Proxy.new(@dummy, @dummy.class, @dummy.id, :queue => :new_queue, :from_now => 60)
       end
 
       describe "#method_missing" do
