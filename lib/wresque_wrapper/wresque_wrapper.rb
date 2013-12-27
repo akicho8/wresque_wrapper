@@ -20,7 +20,7 @@ module WresqueWrapper
   module ClassMethods
     # 自分自身が Worker になっている
     def perform(id, method, *args)
-      ActiveRecord::Base.verify_active_connections!
+      ActiveRecord::Base.clear_active_connections!
       if id
         self.find(id).send(method, *args)
       else
