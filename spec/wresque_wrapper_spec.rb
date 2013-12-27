@@ -2,6 +2,7 @@ require 'spec_helper'
 require 'wresque_wrapper/wresque_wrapper'
 require 'resque'
 require 'resque_scheduler'
+require 'active_record'
 
 describe WresqueWrapper do
 
@@ -17,9 +18,6 @@ describe WresqueWrapper do
       self.default_queue = :dummy_queue
       def id; 1; end
     end
-
-    ActiveRecord::Base.stubs(:verify_active_connections!).returns(true)
-
     @dummy = DummyClass.new
   end
 
@@ -165,6 +163,5 @@ describe WresqueWrapper do
         end
       end
     end
-
   end
 end
