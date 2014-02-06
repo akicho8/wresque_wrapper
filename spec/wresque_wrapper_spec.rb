@@ -56,7 +56,7 @@ describe WresqueWrapper do
       it "should send the method to an instance if given an id" do
         test_method = :test_method
         test_args = [1, 2, 3]
-        DummyClass.expects(:find).once.returns(@dummy)
+        DummyClass.expects(:unscoped).once.returns(stub(:find => @dummy))
         @dummy.expects(:send).with(test_method, *test_args).once.returns(true)
         DummyClass.perform(1, test_method, *test_args)
       end

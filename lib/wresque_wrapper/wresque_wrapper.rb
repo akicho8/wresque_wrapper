@@ -22,7 +22,7 @@ module WresqueWrapper
     def perform(id, method, *args)
       ActiveRecord::Base.clear_active_connections!
       if id
-        self.find(id).send(method, *args)
+        self.unscoped.find(id).send(method, *args)
       else
         self.send(method, *args)
       end
